@@ -85,9 +85,10 @@
   (let [row (get map y)]
     (= \# (get row (mod x (count row))))))
 
+; The below can be used for day 3 part 2 also by calling the appropriate steps
 (defn d3-1
-  []
+  [down right]
   (let [map (read-map "input_d3-1.txt")]
     (reduce +
-            (for [line (range 1 (count map))]
-              (if (space? map (* line 3) line) 0 1)))))
+            (for [line (range down (count map) down)]
+              (if (space? map (* (/ line down) right) line) 0 1)))))
