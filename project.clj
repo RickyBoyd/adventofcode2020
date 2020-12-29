@@ -7,4 +7,5 @@
     [org.clojure/clojure "1.10.1"] 
     [org.clojure/tools.namespace "1.1.0"]
     ]
+  :plugins [[lein-cljfmt "0.7.0"]]
   :repl-options {:init-ns aoc2020.core})
