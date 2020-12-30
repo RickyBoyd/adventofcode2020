@@ -179,3 +179,16 @@
   []
   (with-open [rdr (clojure.java.io/reader "input_d5-1.txt")]
     (reduce (fn [cur-max line] (max cur-max (pass-to-seat-id line))) 0 (line-seq rdr))))
+
+(defn generate-seat-id-set
+  []
+  (set
+   (for [i (range 1 126)
+         j (range 7)]
+     (seat-id i j))))
+
+(defn d5-2
+  []
+  (let [all-seats (generate-seat-id-set)]
+    (with-open [rdr (clojure.java.io/reader "input_d5-2.txt")]
+    (reduce (fn [all-seats line] (disj all-seats (pass-to-seat-id line))) all-seats (line-seq rdr)))))
