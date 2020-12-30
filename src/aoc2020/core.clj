@@ -91,7 +91,7 @@
   (let [map (read-map "input_d3-1.txt")]
     (reduce +
             (for [line (range down (count map) down)]
-              (if (space? map (* (/ line down) right) line) 0 1)))))
+              (if (tree? map (* (/ line down) right) line) 0 1)))))
 
 (defn split-file-by-blanks
   [filename]
@@ -117,23 +117,65 @@
 (defn valid-passport2?
   [passport-in]
   (let [passport (str passport-in " ")]
-  (boolean
-   (and
-    (re-find #"byr:(19[2-9][0-9]|200[0-2])\s" passport)
-    (re-find #"iyr:(201[0-9]|2020)\s" passport)
-    (re-find #"eyr:(202[0-9]|2030)\s" passport)
-    (let [[_ number-str type] (re-find #"hgt:([0-9]+)(cm|in)\s" passport)]
-      (and number-str type
-           (let [number (Integer/parseInt number-str)]
-             (cond
-               (= type "cm") (<= 150 number 193)
-               (= type "in") (<= 59 number 76)
-               :else nil))))
-    (re-find #"hcl:#([a-f]|[0-9]){6}\s" passport)
-    (re-find #"ecl:(amb|blu|brn|gry|grn|hzl|oth)\s" passport)
-    (re-find #"pid:([0-9]{9})\s" passport)))))
+    (boolean
+     (and
+      (re-find #"byr:(19[2-9][0-9]|200[0-2])\s" passport)
+      (re-find #"iyr:(201[0-9]|2020)\s" passport)
+      (re-find #"eyr:(202[0-9]|2030)\s" passport)
+      (let [[_ number-str type] (re-find #"hgt:([0-9]+)(cm|in)\s" passport)]
+        (and number-str type
+             (let [number (Integer/parseInt number-str)]
+               (cond
+                 (= type "cm") (<= 150 number 193)
+                 (= type "in") (<= 59 number 76)
+                 :else nil))))
+      (re-find #"hcl:#([a-f]|[0-9]){6}\s" passport)
+      (re-find #"ecl:(amb|blu|brn|gry|grn|hzl|oth)\s" passport)
+      (re-find #"pid:([0-9]{9})\s" passport)))))
 
 (defn d4-2
   []
   (let [passports (split-file-by-blanks "input_d4-2.txt")]
     (reduce (fn [cnt pport] (if (valid-passport2? pport) (inc cnt) cnt)) 0 passports)))
+
+(defn middle
+  [lo hi]
+  (int (Math/floor (/ (+ hi lo) 2))))
+
+(defn binary-split
+  [lo hi up?]
+  (if up?
+    [(inc (middle lo hi)) hi]
+    [lo (middle lo hi)]))
+
+(defn seat-id
+  [row column]
+  (+ column (* 8 row)))
+
+(defn binary-partition
+  [min max pass up-char]
+  (first
+   (reduce
+    (fn [cur char]
+      (let [up? (= up-char char)]
+        (apply binary-split
+               (conj cur up?))))
+    [min max] pass)))
+
+(defn column
+  [pass]
+  (binary-partition 0 7 pass \R))
+
+(defn row
+  [pass]
+  (binary-partition 0 127 pass \B))
+
+(defn pass-to-seat-id
+  [pass]
+  (let [row (row (subs pass 0 7)) column (column (subs pass 7 10))]
+    (seat-id row column)))
+
+(defn d5-1
+  []
+  (with-open [rdr (clojure.java.io/reader "input_d5-1.txt")]
+    (reduce (fn [cur-max line] (max cur-max (pass-to-seat-id line))) 0 (line-seq rdr))))
