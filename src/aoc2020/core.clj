@@ -191,4 +191,37 @@
   []
   (let [all-seats (generate-seat-id-set)]
     (with-open [rdr (clojure.java.io/reader "input_d5-2.txt")]
-    (reduce (fn [all-seats line] (disj all-seats (pass-to-seat-id line))) all-seats (line-seq rdr)))))
+      (reduce (fn [all-seats line] (disj all-seats (pass-to-seat-id line))) all-seats (line-seq rdr)))))
+
+(defn into-alpha-set
+  [input]
+  (reduce
+   (fn [set v]
+     (if (Character/isLetter v)
+       (conj set v)
+       set))
+   #{} input))
+
+(defn d6-1
+  []
+  (let [input (split-file-by-blanks "input_d6-1.txt")]
+    (reduce +
+            (map count
+                 (map into-alpha-set input)))))
+
+(defn into-alpha-count
+  [input]
+  (into {} 
+    (filter #(Character/isLetter (first %)) (frequencies input))))
+
+(defn to-all-count
+  [frequencies total-people]
+  (count (filter (fn [x] (= (second x) total-people)) frequencies)))
+
+(defn d6-2
+  []
+  (let [input (split-file-by-blanks "input_d6-2.txt")]
+    (reduce + 
+      (map #(to-all-count (first %) (second %)) 
+        (map (fn [x] [(into-alpha-count x) 
+          (count (clojure.string/split-lines x))]) input)))))
